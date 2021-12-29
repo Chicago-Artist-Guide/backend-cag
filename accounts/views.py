@@ -27,19 +27,26 @@ class AccountCreateView(CreateAPIView, UpdateAPIView):
         return Response({"success": "Successfully created", "data": user_serializer_obj.data},
                         status=status.HTTP_201_CREATED)
 
+
+class AccountUpdateView(UpdateAPIView):
+    queryset = models.CustomUser.objects.all()
+    serializer_class = serializers.UserSerializer
+    permission_classes = (AllowAny,)
+    # lookup_field = 'pk'
+
     def update(self, request, *args, **kwargs):
         """ Method for update user's profile picture and what_you_like_doing field """
-
+        
         try:
             data = request.data.copy()
-            user = models.CustomUser.objects.get(id=data.get('user_id'))
+            instance = self.get_object()
         except models.CustomUser.DoesNotExist:
             return Response({"error": "User doesn't exist"},
                             status=status.HTTP_400_BAD_REQUEST)
         else:
-            data.pop('user_id')
-            user_serializer_obj = serializers.UserProfileSerializer(user.profile, data=data, partial=True)
+            user_serializer_obj = serializers.UserProfileSerializer(instance.profile, data=data, partial=True)
             user_serializer_obj.is_valid(raise_exception=True)
             user_serializer_obj.save()
             return Response({"success": "Successfully created", "data": user_serializer_obj.data},
                             status=status.HTTP_200_OK)
+
