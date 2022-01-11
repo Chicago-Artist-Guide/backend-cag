@@ -100,6 +100,8 @@ class Profile(BaseModel):
     perform = models.TextField()
     some_details_page = models.TextField()
     category = models.CharField(choices=CategoryChoices.choices, max_length=255)
+    basics_18_plus = models.BooleanField(default=False)
+    privacy_agreement = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email

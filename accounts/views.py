@@ -24,7 +24,7 @@ class AccountCreateView(CreateAPIView, UpdateAPIView):
         user_serializer_obj = self.serializer_class(data=data)
         user_serializer_obj.is_valid(raise_exception=True)
         user_serializer_obj.save()
-        return Response({"success": "Successfully created", "data": user_serializer_obj.data},
+        return Response({"success": "Successfully created", "data": data},
                         status=status.HTTP_201_CREATED)
 
 
