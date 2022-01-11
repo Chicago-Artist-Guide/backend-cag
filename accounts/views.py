@@ -18,7 +18,7 @@ class AccountCreateView(CreateAPIView, UpdateAPIView):
     permission_classes = (AllowAny,)
 
     def create(self, request, *args, **kwargs):
-        """ Method for create user and user's profile """
+        """ Method for create user and user's profile. """
 
         data = request.data.copy()
         user_serializer_obj = self.serializer_class(data=data)
