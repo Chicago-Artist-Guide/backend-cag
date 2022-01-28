@@ -56,6 +56,40 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class AsianIdentitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AsianIdentity
+        fields = '__all__'
+
+
+class WhatDoYouLikeDoingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.WhatDoYouLikeDoing
+        exclude = ['created_at', "updated_at"]
+
+
+class AlmostDoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AlmostDone
+        exclude = ['created_at', "updated_at"]
+
+
+class GetSomeDetailsSerializer(serializers.ModelSerializer):
+    asian = AsianIdentitySerializer()
+
+    class Meta:
+        model = models.GetSomeDetails
+        fields = '__all__'
+
+    def create(self, validated_data):
+        asian_obj = validated_data.pop('asian')
+        get_some_details = models.GetSomeDetails(**validated_data)
+        get_some_details.save()
+        asian_obj.update({"get_some_details": get_some_details})
+        models.AsianIdentity.objects.create(**asian_obj)
+        return get_some_details
+
+
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer()
 

@@ -24,6 +24,23 @@ class AccountCreateView(CreateAPIView, UpdateAPIView):
         user_serializer_obj = self.serializer_class(data=data)
         user_serializer_obj.is_valid(raise_exception=True)
         user_serializer_obj.save()
+        data['id'] = user_serializer_obj.instance.id
+        return Response({"success": "Successfully created", "data": data},
+                        status=status.HTTP_201_CREATED)
+
+
+class GetSomeDetailsCreateView(CreateAPIView):
+    queryset = models.GetSomeDetails.objects.all()
+    serializer_class = serializers.GetSomeDetailsSerializer
+    permission_classes = (AllowAny,)
+
+    def create(self, request, *args, **kwargs):
+        """ Method for create user and user's profile. """
+
+        data = request.data.copy()
+        user_serializer_obj = self.serializer_class(data=data)
+        user_serializer_obj.is_valid(raise_exception=True)
+        user_serializer_obj.save()
         return Response({"success": "Successfully created", "data": data},
                         status=status.HTTP_201_CREATED)
 
@@ -50,3 +67,26 @@ class AccountUpdateView(UpdateAPIView):
             return Response({"success": "Successfully created", "data": user_serializer_obj.data},
                             status=status.HTTP_200_OK)
 
+
+
+class WhatDoYouLikeDoingView(CreateAPIView):
+    queryset = models.WhatDoYouLikeDoing.objects.all()
+    serializer_class = serializers.WhatDoYouLikeDoingSerializer
+    permission_classes = (AllowAny,)
+
+
+class AlmostDoneView(CreateAPIView):
+    queryset = models.AlmostDone.objects.all()
+    serializer_class = serializers.AlmostDoneSerializer
+    permission_classes = (AllowAny,)
+
+    # def create(self, request, *args, **kwargs):
+    #     """ Method for create user and user's profile. """
+
+    #     data = request.data.copy()
+    #     user_serializer_obj = self.serializer_class(data=data)
+    #     user_serializer_obj.is_valid(raise_exception=True)
+    #     user_serializer_obj.save()
+    #     data['id'] = user_serializer_obj.instance.id
+    #     return Response({"success": "Successfully created", "data": data},
+    #                     status=status.HTTP_201_CREATED)
