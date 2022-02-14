@@ -5,9 +5,9 @@ app_name = 'accounts'
 
 urlpatterns = [
     path('token/', views.UserObtainTokenPairView.as_view(), name='token_obtain_pair'),
-    path('createaccount/', views.AccountCreateView.as_view(), name='create_account'),
-    path('get-some-details/', views.GetSomeDetailsCreateView.as_view(), name='get_some_details'),
-    path('what-you-like-doing/', views.WhatDoYouLikeDoingView.as_view(), name='what_you_like_doing'),
-    path('almost-done/', views.AlmostDoneView.as_view(), name='almost_done'),
-    path('update-account/<int:pk>/', views.AccountUpdateView.as_view(), name='update_account'),
+    path('create/', views.AccountCreateView.as_view(), name='create_account'),
+    path('get/<int:pk>/', views.RetrieveAccountView.as_view(), name='get_account'),
+    path('update/<int:pk>/', views.AccountUpdateView.as_view(), name='update_account'),
+    path('profile/basic/', views.BasicProfileCreateView.as_view(), name='basic_profile'),
+    path('profile/basic/get/<int:pk>/', views.RetrieveBasicProfile.as_view(), name='get_basic_profile'),
 ]

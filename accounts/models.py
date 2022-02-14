@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
+from django.db.models import JSONField
+
 
 
 class BaseModel(models.Model):
@@ -50,6 +53,10 @@ class UserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin, BaseModel):
+    class UserStatus(models.TextChoices):
+        Active = 'active', 'Active',
+        In_Active = 'inactive', 'In Active'
+
     email = models.EmailField(
         'email address',
         max_length=255,
@@ -70,6 +77,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, BaseModel):
                                    default=False,
                                    help_text=('Designates whether the user can log into this admin site.'),
                                    )
+    status = models.CharField(choices=UserStatus.choices, max_length=255, default=UserStatus.Active)
     date_joined = models.DateTimeField(('date joined'), default=timezone.now)
     USERNAME_FIELD = 'email'
 
@@ -110,130 +118,29 @@ class Profile(BaseModel):
         return self.user.email
 
 
-class GetSomeDetails(BaseModel):
-    class PronounsChoices(models.TextChoices):
-        x1 = 'x1', 'X1',
-        x2 = 'x2', 'X2'
-
-    class LGBTQIACommunityIdentificationChoices(models.TextChoices):
-        Yes = 'yes', 'Yes',
-        No = 'no', 'No'
-        Do_Not_Wish = 'do_not_wish', 'Do_Not_Wish'
-
-    class GenderIdentity(models.TextChoices):
-        Male = 'male', 'Male',
-        Female = 'female', 'Female'
-
-    class AgeRange(models.TextChoices):
-        eighteen_to_twenty_two = '18-22', 'Eighteen to Twenty Two',
-        twenty_three_to_twenty_seven = '23-27', 'Twenty Three to Twenty Seven'
-        twenty_eight_to_thirty_two = '28-32', 'Twenty Eight to Thirty Two'
-        thirty_three_to_thirty_seven = '33-37', 'Thirty Three to Thirty Seven'
-        thirty_eight_to_fourty_two = '38-42', 'Thirty Eight to Fourty Two'
-        fourty_three_to_fourty_seven = '43-47', 'Fourty Three to Fourty Seven'
-        fourty_eight_to_fifty_two = '48-52', 'Fourty Eight to Fifty Two'
-        fifty_three_to_fifty_seven = '53-57', 'Fifty Three to Fifty Seven'
-        fifty_eight_to_sixty_two = '58-62', 'Fifty Eight to Sixty Two'
-        sixty_two_plus = '62+', 'Sixty Two Plus'
-
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='user_get_some_details', blank=True, null=True)
-    pronouns = models.CharField(choices=PronounsChoices.choices, max_length=255, default=PronounsChoices.x1)
-    other = models.CharField(max_length=255, null=True, blank=True)
-    lgbtqia_community_identification = models.CharField(choices=LGBTQIACommunityIdentificationChoices.choices, max_length=255, default=LGBTQIACommunityIdentificationChoices.Yes)
-    
-    # Your identity fields
-    # asian = models.ForeignKey(AsianIdentity, on_delete=models.CASCADE, blank=True, null=True)
-    black_or_african_american = models.BooleanField(default=False)
-    indigenous = models.BooleanField(default=False)
-    latinx = models.BooleanField(default=False)
-    mena = models.BooleanField(default=False)
-    native_hawailan_or_other_pacific_islander = models.BooleanField(default=False)
-    white = models.BooleanField(default=False)
-
-    # height
-    feet = models.IntegerField(default=0)
-    inches = models.FloatField(default=0.0)
-    i_do_not_wish_to_answer = models.BooleanField(default=False)
-
-    # Age RAnge
-    age_range = models.CharField(choices=AgeRange.choices, max_length=255, default=AgeRange.eighteen_to_twenty_two)
-
-    # Gender Identity
-    gender_identity = models.CharField(choices=GenderIdentity.choices, max_length=255, default=GenderIdentity.Male)
-
-    # Comfortable Playing Roles
-    women = models.BooleanField(default=False)
-    men = models.BooleanField(default=False)
-    neither = models.BooleanField(default=False)
-
-    # Playing Character through transition
-    playing_character_throgh_transition = models.BooleanField(default=False)
+class BasicProfile(BaseModel):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    pronouns = models.CharField(max_length=255)
+    lgbtqia = models.CharField(max_length=255)
+    ethnicities = ArrayField(models.CharField(max_length=200))
+    height_feet = models.IntegerField(blank=True, null=True)
+    height_inches = models.IntegerField(blank=True, null=True)
+    height_no_answer = models.BooleanField(default=False)
+    age_range = models.CharField(max_length=255)
+    gender = models.CharField(max_length=255)
+    gender_roles = ArrayField(models.CharField(max_length=200))
+    gender_transition = ArrayField(models.CharField(max_length=200))
+    offstage_general = ArrayField(models.CharField(max_length=200))
+    offstage_production = ArrayField(models.CharField(max_length=200))
+    offstage_scenic_and_properties = ArrayField(models.CharField(max_length=200))
+    offstage_lighting = ArrayField(models.CharField(max_length=200))
+    offstage_sound = ArrayField(models.CharField(max_length=200))
+    offstage_hair_makeup_costumes = ArrayField(models.CharField(max_length=200))
+    profile_image_url = models.TextField(null=True, blank=True)
+    union_status = models.CharField(max_length=255)
+    agency = models.CharField(max_length=255)
+    websites = JSONField()
+    bio = models.TextField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.user.email
-
-
-class AsianIdentity(models.Model):
-    get_some_details = models.ForeignKey(GetSomeDetails, on_delete=models.CASCADE, blank=True, null=True)
-    east_asian = models.BooleanField(default=False)
-    south_east_asian = models.BooleanField(default=False)
-    south_asian = models.BooleanField(default=False)
-    central_west_asian = models.BooleanField(default=False)
-
-
-class WhatDoYouLikeDoing(BaseModel):
-
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='user_what_you_like_doing', blank=True, null=True)
-    
-    # General
-    directing = models.BooleanField(default=False)
-    violence_fight_design = models.BooleanField(default=False)
-    intimacy_design = models.BooleanField(default=False)
-    choreography = models.BooleanField(default=False)
-    casting = models.BooleanField(default=False)
-    dramaturgy = models.BooleanField(default=False)
-    dialect_coaching = models.BooleanField(default=False)
-    musical_directing = models.BooleanField(default=False)
-
-    # Production
-    stage_management = models.BooleanField(default=False)
-    production_management = models.BooleanField(default=False)
-    board_op = models.BooleanField(default=False)
-    run_crew = models.BooleanField(default=False)
-
-    # Scenic & Properties
-    set_design = models.BooleanField(default=False)
-    technical_direction = models.BooleanField(default=False)
-    properties_designer = models.BooleanField(default=False)
-    scenic_carpentery = models.BooleanField(default=False)
-    charge_artist = models.BooleanField(default=False)
-
-    # Lighting
-    light_design = models.BooleanField(default=False)
-    projection_design = models.BooleanField(default=False)
-    special_effect_design = models.BooleanField(default=False)
-    master_electrician = models.BooleanField(default=False)
-
-    # Sound
-    sound_design = models.BooleanField(default=False)
-    sound_mixer_engineer = models.BooleanField(default=False)
-
-    # Hair, makeup, costumes
-    costume_design = models.BooleanField(default=False)
-    hair_and_wig_design = models.BooleanField(default=False)
-    makeup_design = models.BooleanField(default=False)
-
-
-    def __str__(self):
-        return self.user.email
-
-
-class AlmostDone(BaseModel):
-    class UnionChoices(models.TextChoices):
-        Agency = 'agency', 'Agency'
-
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='user_almost_done', blank=True, null=True)
-    union = models.CharField(choices=UnionChoices.choices, max_length=255, default=UnionChoices.Agency)
-    other = models.CharField(max_length=255, null=True, blank=True)
-    url = models.URLField(max_length=255, null=True, blank=True)
-    type = models.CharField(max_length=255, null=True, blank=True)

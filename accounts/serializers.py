@@ -6,6 +6,7 @@ from rest_framework.serializers import ValidationError as RestValidationError
 from rest_framework import status
 
 
+
 class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'username_or_email'
 
@@ -50,44 +51,12 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Profile
         fields = '__all__'
 
-
-class AsianIdentitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.AsianIdentity
-        fields = '__all__'
-
-
-class WhatDoYouLikeDoingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.WhatDoYouLikeDoing
-        exclude = ['created_at', "updated_at"]
-
-
-class AlmostDoneSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.AlmostDone
-        exclude = ['created_at', "updated_at"]
-
-
-class GetSomeDetailsSerializer(serializers.ModelSerializer):
-    asian = AsianIdentitySerializer()
-
-    class Meta:
-        model = models.GetSomeDetails
-        fields = '__all__'
-
-    def create(self, validated_data):
-        asian_obj = validated_data.pop('asian')
-        get_some_details = models.GetSomeDetails(**validated_data)
-        get_some_details.save()
-        asian_obj.update({"get_some_details": get_some_details})
-        models.AsianIdentity.objects.create(**asian_obj)
-        return get_some_details
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -103,3 +72,19 @@ class UserSerializer(serializers.ModelSerializer):
         profile_obj.update({"user": user})
         models.Profile.objects.create(**profile_obj)
         return user
+
+
+
+class RetrieveUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.CustomUser
+        fields = ['email', 'first_name', 'last_name', 'created_at', 'updated_at', 'status']
+
+
+
+class BasicProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BasicProfile
+        fields = '__all__'
