@@ -5,7 +5,11 @@ from . import models
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
-
+from rest_framework.views import APIView
+import boto3
+from botocore.exceptions import NoCredentialsError
+from accounts.custom_storage import MediaStorage
+import os
 
 
 class UserObtainTokenPairView(TokenObtainPairView):
@@ -73,7 +77,6 @@ class AccountUpdateView(UpdateAPIView):
                             status=status.HTTP_200_OK)
 
 
-
 class BasicProfileCreateView(CreateAPIView):
     queryset = models.BasicProfile.objects.all()
     serializer_class = serializers.BasicProfileSerializer
@@ -90,7 +93,37 @@ class BasicProfileCreateView(CreateAPIView):
         return Response({"success": "Successfully created", "data": data},
                         status=status.HTTP_201_CREATED)
 
+
 class RetrieveBasicProfile(RetrieveAPIView):
     queryset = models.BasicProfile.objects.all()
     serializer_class = serializers.BasicProfileSerializer
     permission_classes = (AllowAny,)
+
+
+class UploadProfilePictureCreateView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, requests):
+        try:
+            file_obj = requests.data.get('file', '')
+
+            # do your validation here e.g. file size/type check
+
+            # organize a path for the file in bucket
+            file_directory_within_bucket = 'users_profile_pictures/{user_id}'.format(user_id=str(requests.user.id))
+
+            # synthesize a full file path; note that we included the filename
+            file_path_within_bucket = os.path.join(
+                file_directory_within_bucket,
+                file_obj.name
+            )
+
+            media_storage = MediaStorage()
+            media_storage.save(file_path_within_bucket, file_obj)
+            file_url = media_storage.url(file_path_within_bucket)
+
+            return Response({
+                'profile_image_url': file_url,
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
