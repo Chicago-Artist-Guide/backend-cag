@@ -10,5 +10,5 @@ urlpatterns = [
     path('update/<int:pk>/', views.AccountUpdateView.as_view(), name='update_account'),
     path('profile/basic/', views.BasicProfileCreateView.as_view(), name='basic_profile'),
     path('profile/basic/get/<int:pk>/', views.RetrieveBasicProfile.as_view(), name='get_basic_profile'),
-    path('upload-profile-pic-on-s3/', views.UploadProfilePictureCreateView.as_view(), name='upload_profile_pic_on_s3'),
+    path('image-upload/', views.UploadProfilePictureCreateView.as_view(), name='upload_profile_pic_on_s3'),
 ]
