@@ -139,7 +139,7 @@ class BasicProfile(BaseModel):
     profile_image_url = models.TextField(null=True, blank=True)
     union_status = models.CharField(max_length=255)
     agency = models.CharField(max_length=255)
-    websites = JSONField()
+    websites = JSONField(default=list)
     bio = models.TextField(max_length=255, null=True, blank=True)
 
     def __str__(self):
